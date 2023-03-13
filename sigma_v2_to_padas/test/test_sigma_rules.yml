@@ -1,0 +1,137 @@
+[
+    {
+        "id": "0e0001d-7320-415d-80f7-004da920fc11",
+        "name": "Test1_AND",
+        "description": "This is description",
+        "datamodel": "x_category",
+        "annotations": "",
+        "pdl": "((EventLog=\"Security\") AND (EventID=4769) AND (TicketOptions=\"0x40810000\") AND (TicketEncryption=\"0x17\"))",
+        "enabled": false
+    },
+    {
+        "id": "0e0002d",
+        "name": "Test2_OR-Str-Numeric",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((Value=35 OR Value=99 OR Value=\"23\"))",
+        "enabled": false
+    },
+    {
+        "id": "10e0003d-7320-415d-80f7-004da920fc11\"",
+        "name": "Test3_Contains",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((Image?=\"C:\\\\Windows\\\\System32\\\\whoami.exe\"))",
+        "enabled": false
+    },
+    {
+        "id": "0e0004d",
+        "name": "Test4_GT",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((Value>35))",
+        "enabled": false
+    },
+    {
+        "id": "0e0005d",
+        "name": "Test5_LT",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((Value<100))",
+        "enabled": false
+    },
+    {
+        "id": "0e0006d",
+        "name": "Test6_AND-GT-LT",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((Value>35) AND (Value<99))",
+        "enabled": false
+    },
+    {
+        "id": "0e0007d",
+        "name": "Test7_OR-GT",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((Value>35 OR Value>75))",
+        "enabled": false
+    },
+    {
+        "id": "0e0008d",
+        "name": "Test8_OR-LT",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((Value<35 OR Value<75))",
+        "enabled": false
+    },
+    {
+        "id": "0e0009d",
+        "name": "Test9_AND-GTE-LTE",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((Value>=35) AND (Value<=99))",
+        "enabled": false
+    },
+    {
+        "id": "0e00010d",
+        "name": "Test10_Startswith",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((File=\"C:\\\\Windows\\\\System32\\\\*\"))",
+        "enabled": false
+    },
+    {
+        "id": "0e00011d",
+        "name": "Test11_Endswith",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((File=\"*\\\\example.exe\"))",
+        "enabled": false
+    },
+    {
+        "id": "0e00012d",
+        "name": "Test12_AND-Startswith-Endswith",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((File=\"C:\\\\Windows\\\\System32\\\\*\") AND (File=\"*\\\\example.exe\"))",
+        "enabled": false
+    },
+    {
+        "id": "0e00013d",
+        "name": "Test13_Null",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((File!=\"*\"))",
+        "enabled": false
+    },
+    {
+        "id": "0e00014d",
+        "name": "Test14_Contains-Endswith-AND NOT-Null",
+        "description": "This is description",
+        "datamodel": "x_category_y_product",
+        "annotations": "",
+        "pdl": "((File?=\"example\") AND (File=\"*.exe\")) and not ((File!=\"*\"))",
+        "enabled": false
+    },
+    {
+        "id": "0e00015d",
+        "name": "Test15_Contains-Endswith-AND NOT-Null",
+        "description": "This is description",
+        "datamodel": "x_category_y_product_2",
+        "annotations": "",
+        "pdl": "((File?=\"example\") AND (File=\"*.exe\")) and not ((File!=\"*\") AND (File=\"file*\" OR File=\"44*\"))",
+        "enabled": false
+    }
+]

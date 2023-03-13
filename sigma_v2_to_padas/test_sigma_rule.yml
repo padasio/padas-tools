@@ -1,0 +1,259 @@
+title: Test1_AND
+id: "0e0001d-7320-415d-80f7-004da920fc11"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+detection:
+   selection:
+      EventLog: Security
+      EventID: 4769
+      TicketOptions: "0x40810000"
+      TicketEncryption: "0x17"
+   condition: selection
+---
+title: Test2_OR-Str-Numeric
+id: "0e0002d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        Value:
+          - 35
+          - 99
+          - "23"
+    condition: selection
+level: high
+---
+title: Test3_Contains
+id: 10e0003d-7320-415d-80f7-004da920fc11"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        Image|contains: "C:\\Windows\\System32\\whoami.exe"
+    condition: selection
+level: high
+---
+title: Test4_GT
+id: "0e0004d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        Value|gt: 35
+    condition: selection
+level: high
+---
+title: Test5_LT
+id: "0e0005d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        Value|lt: 100
+    condition: selection
+level: high
+---
+title: Test6_AND-GT-LT
+id: "0e0006d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        Value|gt: 35
+        Value|lt: 99
+    condition: selection
+level: high
+---
+title: Test7_OR-GT
+id: "0e0007d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        Value|gt:
+          - 35
+          - 75
+    condition: selection
+level: high
+---
+title: Test8_OR-LT
+id: "0e0008d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        Value|lt:
+          - 35
+          - 75
+    condition: selection
+level: high
+---
+title: Test9_AND-GTE-LTE
+id: "0e0009d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        Value|gte: 35
+        Value|lte: 99
+    condition: selection
+level: high
+---
+title: Test10_Startswith
+id: "0e00010d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        File|startswith: "C:\\Windows\\System32\\"
+    condition: selection
+level: high
+---
+title: Test11_Endswith
+id: "0e00011d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        File|endswith: "\\example.exe"
+    condition: selection
+level: high
+---
+title: Test12_AND-Startswith-Endswith
+id: "0e00012d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        File|startswith: "C:\\Windows\\System32\\"
+        File|endswith: "\\example.exe"
+    condition: selection
+level: high
+---
+title: Test13_Null
+id: "0e00013d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        File: null
+    condition: selection
+level: high
+---
+title: Test14_Contains-Endswith-AND NOT-Null
+id: "0e00014d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        File|contains: "example"
+        File|endswith: ".exe"
+    filter:
+        File: null
+    condition: selection and not filter
+level: high
+---
+title: Test15_Contains-Endswith-AND NOT-Null
+id: "0e00015d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product 2
+detection:
+    selection:
+        File|contains: "example"
+        File|endswith: ".exe"
+    filter:
+        File: null
+        File|startswith:
+          - "file"
+          - "44"
+    condition: selection and not filter
+level: high
