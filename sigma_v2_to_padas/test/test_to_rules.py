@@ -14,45 +14,44 @@ Usage :
         python3.9 test_to_rules.py ../test_padas_rules.yml . 
 """
 
+
 def getting_test_files():
     """
     
 
     Returns
     -------
-    Gets test_padas.yml & test_sigma_rules.yml to interpret each other.
-    test_padas_rules.yml has to be same as test_sigma-padas_rules.yml
+    Turns "input_sigma_rules.yml" file into "input_sigma_rules.json" with 
+    "sigma_v2_to_padas.py" script. Also, interpret the input_sigma_rules.json
+    with expected_output.json
+    
+    input_sigma_rules.json has to be same as expected_output.json
     
     data_padas : 
-        has padas rules that was calculated with sigma_v2_to_padas.py script
+        has padas rules that was calculated with sigma_v2_to_padas.py script (json)
     data_sigma : 
-        has properly converted sigma rules to padas rules
+        has properly converted sigma rules to padas rules (json)
 
     """
     import os
     import yaml
-    import sys
     from time import sleep
     
-    path = sys.argv[2]
-    prev_path = sys.argv[1]
-     
-    os.popen('cp ' + prev_path + ' ' + path)
-    
+    os.system('python3.9 ../sigma_v2_to_padas.py input_sigma_rules.yml input_sigma_rules.json')
     sleep(2)
     
     data_padas = []
     data_sigma = []
 
-    with open(path + '/test_padas_rules.yml') as f_yaml:
+    with open('input_sigma_rules.json') as f_yaml:
         for doc in yaml.safe_load_all(f_yaml):
             data_padas.append(doc)
-
-    with open(path + '/test_sigma-padas_rules.yml') as f_yaml:
+            
+    with open('expected_output.json') as f_yaml:
         for doc in yaml.safe_load_all(f_yaml):
             data_sigma.append(doc)
           
-    return data_padas[0], data_sigma            
+    return data_padas, data_sigma            
 
             
 def check_if_they_are_same(data_padas, data_sigma): 
@@ -72,34 +71,32 @@ def check_if_they_are_same(data_padas, data_sigma):
 
     """
     
-    test_vs_real_result = []  
-    count_ = 0         
-    for file in data_padas:
-        for sigma_test_file in data_sigma[0]:
-            if file['id'] == sigma_test_file['id']:
-                test_vs_real_result = [file,sigma_test_file] 
-            elif file['name'] == sigma_test_file['name']:
-                test_vs_real_result = [file,sigma_test_file] 
-
-                
-        if len(test_vs_real_result) == 0:
-            print('Error: Same "id" or "name" can not be found in both files for test number of ' + str(count_) + '!')
+    count = 0         
+    for i in range(len(data_sigma[0])):
+        if data_padas[0][i]['id'] != data_sigma[0][i]['id']:
+            print('Error: Same "id" or "name" can not be found in both files for test number of ' + str(count) + '!')
         else:
-            count = 0
-            for fields in test_vs_real_result[1]:
-                if test_vs_real_result[0][fields] != test_vs_real_result[1][fields]:
-                    print('Thay are NOT same : Test Sigma Result = ' + test_vs_real_result[1][fields] + \
-                          " - PADAS Result = " + test_vs_real_result[0][fields])
-                    count+=1
-            print(' ')
-            if count != 0:
-                print('NOT Same : PADAS-' + test_vs_real_result[0]['name'] + ' and SIGMA-' + test_vs_real_result[1]['name'] )
+            if (sorted(data_padas[0][i].items()) == sorted(data_sigma[0][i].items())) == True:
+                print('Same : ' + data_sigma[0][i]['name'])
             else:
-                print('Same : ' + test_vs_real_result[0]['name'])
-            print('---')
-        count_+=1
+                print('NOT Same : PADAS - ' + data_padas[0][i]['name'] + 'SIGMA - ' + data_sigma[0][i]['name'])
+        print('---')
+    
+        count+=1
+
 def main():
+    """
+    
+    Main function.
+    
+    Returns
+    -------
+    None.
+
+    """
+    
     try:
+        
         data_padas, data_sigma = getting_test_files()
         check_if_they_are_same(data_padas, data_sigma)
     except Exception as error:

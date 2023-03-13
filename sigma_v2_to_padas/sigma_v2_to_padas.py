@@ -14,7 +14,7 @@ SIGMA V2 Rules to PADAS
 Usage : 
     python3 sigma_v2_to_padas.py path_for_sigma2_yml_input_file path_for_padas_yml_output_file
     EXAMPLE : 
-        python3.9 sigma_v2_to_padas.py test_sigma_rule.yml test_padas_rule.yml       
+        python3.9 sigma_v2_to_padas.py input_sigma_rules.yml input_sigma_rules.json       
  
     If you want to test your data; 
         first add properly converted "test_sigma-padas_rules.yml" file into "test" director with naming
@@ -39,7 +39,7 @@ def get_value_and_check_required_fields(path_for_sigma2_yml_input_file):
 
     Returns
     -------
-    data : S
+    data : 
         SIGMA V2 data from yaml file (dict)
 
     """
@@ -127,13 +127,7 @@ def pdl_converter(data):
               'gte':'>=',
               'lt':'<',
               'lte':'<='}
-    
-    # key = 'filter'
-    # value ={'File': None, 'File|startswith': ['file', 44]}
-    # key2 = 'File|startswith'
-    
-    
-    
+     
     pdl = copy(data)
     condition = pdl['detection'].pop('condition')
     for key, value in pdl['detection'].items():
@@ -180,13 +174,7 @@ def pdl_converter(data):
                     strs = []
                     for i in range(len(value[key2])):
                         if (isinstance(value[key2][i], str)):
-                            strs.append([key3 +'=' + value[key2][i], key3 +'=\"' + value[key2][i] + '\"'])
-                        
-                    
-                    
-                    # join_val = ' OR ' + key3 + parity + '\"'
-                    # key_query.append('(' + key3 + parity + '\"' + join_val.join([str(x) for x in value[key2]]) + '\"')                           
-                    
+                            strs.append([key3 +'=' + value[key2][i], key3 +'=\"' + value[key2][i] + '\"'])          
                     
                     join_val = ' OR ' + key3 + parity 
                     condition_as_str = '(' + key3 + parity + join_val.join([str(x) for x in value[key2]]) + ')'
@@ -200,8 +188,6 @@ def pdl_converter(data):
         key_query = ' AND '.join(key_query[1::]) 
         condition = condition.replace(key, '(' + key_query +')').replace('="None"', '!="*"')
         
-    # print(data['title'])
-    # print(condition)
     return condition.replace('\\','\\\\')
 
 
@@ -242,13 +228,13 @@ def sigma_to_padas(data, padas_scheme):
 
 def pdl_to_json(all_padas_rules, path_for_padas_yml_output_file):
     """
-    Writes PADAS rules into yaml file (json)
+    Writes PADAS rules into json file (json)
 
     Parameters
     ----------
-    padas_rules : 
+    all_padas_rules : 
         Converted PADAS rules (dict)
-    output_file : 
+    path_for_padas_yml_output_file : 
         Full path of PADAS yaml file - output (str)
 
     Returns
@@ -264,6 +250,15 @@ def pdl_to_json(all_padas_rules, path_for_padas_yml_output_file):
     out_file.close()
         
 def main():
+    """
+    
+    Main function.
+    
+    Returns
+    -------
+    None.
+
+    """
 
     try:
         data_ = get_value_and_check_required_fields(path_for_sigma2_yml_input_file)
@@ -272,14 +267,14 @@ def main():
         for i in range(len(data_)):
             padas_scheme = get_padas_scheme(data_[i])
             padas_rules = sigma_to_padas(data_[i], padas_scheme)
-            # print(padas_rules)
             all_padas_rules.append(padas_rules)
             
         pdl_to_json(all_padas_rules, path_for_padas_yml_output_file)
-        print('Done!')
+        print('Converting SIGMA Rules to PADAS Rules is Done!')
+        print(' ')
     except Exception as error:
         print('Error: ' + str(error))
-
+        print(' ')
 
 if __name__ == "__main__":
     main()
