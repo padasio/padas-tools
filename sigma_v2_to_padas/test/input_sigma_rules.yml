@@ -257,3 +257,66 @@ detection:
           - "44"
     condition: selection and not filter
 level: high
+---
+title: Test16_event_count & range
+id: "0e00016d"
+action: correlation
+type: event_count
+rules:
+    - 5638f7c0-ac70-491d-8465-2a65075e0d86
+    - 5638f7c0-ac70-491d-8465-2a65075e0d87
+group-by:
+    - ComputerName
+timespan: 1h
+condition:
+    range: 100..200
+---
+title: Test17_value_count & GTE
+id: "0e00017d"
+action: correlation
+type: value_count
+field: User
+group-by:
+    - ComputerName
+    - WorkstationName
+timespan: 1d
+condition:
+    gte: 100
+---
+title: internal_error
+id: "0e00018d"
+name: Test18_select
+detection:
+  selection:
+    http.response.status_code: 500
+  condition: selection
+---
+title: new_network_connection
+id: "0e00019d"
+name: Test19_select
+detection:
+  selection:
+    event.category: network
+    event.type: connection
+    event.outcome: success
+  condition: selection
+---
+title: Test20_temporal & aliases
+id: "0e00020d"
+action: correlation
+type: temporal
+rule:
+  - Test18_select
+  - Test19_select
+group-by:
+  - internal_ip
+  - remote_ip
+timespan: 10s
+ordered: true
+aliases:
+  internal_ip:
+    internal_error: destination.ip
+    new_network_connection: source.ip
+  remote_ip:
+    internal_error: source.ip
+    new_network_connection: destination.ip

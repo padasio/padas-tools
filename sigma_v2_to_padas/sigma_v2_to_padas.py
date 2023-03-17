@@ -24,8 +24,8 @@ Usage :
 
 
 import sys
-path_for_sigma2_yml_input_file = sys.argv[1]
-path_for_padas_yml_output_file = sys.argv[2]
+path_for_sigma2_yml_input_file = sys.argv[1]#r'input_sigma_rules.yml' #r'input.yml' #
+path_for_padas_yml_output_file = sys.argv[2]#r'output.json' #sys.argv[2]
 
 def get_value_and_check_required_fields(path_for_sigma2_yml_input_file):
     """
@@ -54,7 +54,22 @@ def get_value_and_check_required_fields(path_for_sigma2_yml_input_file):
 
 def get_padas_scheme(data):       
     """
-    Gives properly scheme to if it is simple sigma rule or meta rule
+    Gives appropriate PADAS-SIGMA scheme depending on which one it is.
+    Simple SIGMA or META Rule ;
+    
+        - simple sigma rule 
+                         {'id':'id', \
+                         'name':'title', \
+                         'description':'description', \
+                         'datamodel':'logsource', \
+                         'annotations':'tags', \
+                         'pdl':'detection'}
+        
+    
+        - meta rule
+                        {'id':'id', \
+                         'name':'title', \
+                         'pdl':'action'}    
 
     Parameters
     ----------
@@ -76,38 +91,42 @@ def get_padas_scheme(data):
 
     """
     
-         
     if ('id' not in data.keys()):
         data['id'] = data['title'].replace(' ','_').lower()
+        
 
-    no_required_fields = [field for field in ['id', 'title', 'detection'] if field not in data.keys()]
-    if no_required_fields:
-        raise Exception('Requirement fields are missing: "' + ', "'.join(no_required_fields) + '"')
-    
-    if 'logsource' in data.keys():
+    if 'action' in data.keys():
+        no_required_fields = [field for field in ['id', 'title'] if field not in data.keys()]
+        if no_required_fields:
+            raise Exception('Requirement fields are missing: "' + ', "'.join(no_required_fields) + '"')
+            
         padas_scheme =  {'id':'id', \
                          'name':'title', \
-                        'description':'description', \
-                        'datamodel':'logsource', \
-                        'annotations':'tags', \
-                        'pdl':'detection'}
+                         'pdl':'action'}   
     else:
-       padas_scheme =  {'id':'id', \
-                        'title':'name', \
-                        'description':'detection', \
-                        'padas_rule':'rules', \
-                        'type':'type', \
-                        'field':'field',\
-                        'group_by':'group-by', \
-                        'timespan':'timespan', \
-                        'condition':'condition'}       
+        no_required_fields = [field for field in ['id', 'title', 'detection'] if field not in data.keys()]
+        if no_required_fields:
+            raise Exception('Requirement fields are missing: "' + ', "'.join(no_required_fields) + '"')
+            
+        if 'logsource' in data.keys():
+            padas_scheme =  {'id':'id', \
+                              'name':'title', \
+                              'description':'description', \
+                              'datamodel':'logsource', \
+                              'annotations':'tags', \
+                              'pdl':'detection'}
+        else:
+            padas_scheme =  {'id':'id', \
+                             'name':'name', \
+                             'pdl':'detection'} 
 
+          
     return padas_scheme
 
 
-def pdl_converter(data):
+def padas_rule_converter(data):
     """
-    Converts SIGMA V2 rules to PADAS Rule.
+    Converts SIGMA V2 simple rules to PADAS Rule.
 
     Parameters
     ----------
@@ -116,11 +135,12 @@ def pdl_converter(data):
 
     Returns
     -------
-    condition : 
-        Converted SIGMMA V2 Rule to PADAS Language (dict)
+    pdl : 
+        Converted SIGMA V2 Simple Rule to PADAS Language (dict)
 
     """
     from copy import deepcopy as copy
+    import re
     
     modifs = {'contains':'?=',
               'gt':'>',
@@ -128,9 +148,9 @@ def pdl_converter(data):
               'lt':'<',
               'lte':'<='}
      
-    pdl = copy(data)
-    condition = pdl['detection'].pop('condition')
-    for key, value in pdl['detection'].items():
+    padas_rule = copy(data)
+    pdl = padas_rule['detection'].pop('condition')
+    for key, value in padas_rule['detection'].items():
         key_query = ['pdl']
         for key2 in value.keys():
             
@@ -160,7 +180,6 @@ def pdl_converter(data):
                 parity = '='
                 key3 = key2
 
-            
             if value[key2] is None:
                 key_query.append('(' + key2 + '!=\"*\")')
             else: 
@@ -176,19 +195,103 @@ def pdl_converter(data):
                         if (isinstance(value[key2][i], str)):
                             strs.append([key3 +'=' + value[key2][i], key3 +'=\"' + value[key2][i] + '\"'])          
                     
-                    join_val = ' OR ' + key3 + parity 
-                    condition_as_str = '(' + key3 + parity + join_val.join([str(x) for x in value[key2]]) + ')'
+                    join_val = ' OR (' + key3 + parity
+                    condition_as_str = '(' + key3 + parity + join_val.join([str(x) + ')' for x in value[key2]])
                     
                     for i in range(len(strs)):
                         condition_as_str = condition_as_str.replace(strs[i][0], strs[i][1])
                     
                     key_query.append(condition_as_str)                  
     
-            
-        key_query = ' AND '.join(key_query[1::]) 
-        condition = condition.replace(key, '(' + key_query +')').replace('="None"', '!="*"')
+        if isinstance(key_query[1::], str):   
+            pdl = pdl.replace('="None"', '!="*"')
+        else:
+            key_query = ' AND '.join(key_query[1::]) 
+            pdl = pdl.replace(key, '(' + key_query +')').replace('="None"', '!="*"')
         
-    return condition.replace('\\','\\\\')
+        if len(re.findall('\(', pdl)) <= 2:
+            pdl = pdl.replace('((', '').replace('))','')
+        
+    return pdl.replace('\\','\\\\')
+
+
+def padas_rule_converter_correlation(data):
+    """
+    Converts SIGMA V2 META rules to PADAS Rule.
+
+    Parameters
+    ----------
+    data : SIGMA V2 data from yaml file (dict)
+
+    Returns
+    -------
+    correlation_pdl : Converted SIGMA V2 META Rule to PADAS Language (dict)
+
+    """
+    
+    modifs = {'gt':'>',
+              'gte':'>=',
+              'lt':'<',
+              'lte':'<='}
+    
+    correlation_pdl = ''
+ 
+    # Rules for event_count & value_count
+    if ('rules' in data.keys()):
+        if (data['type'] in ['event_count', 'value_count']):
+            correlation_pdl = 'padas_rule IN ' + '[\"' + '\", \"'.join(data['rules']) + '\"] | '
+    
+    # Rules for every rule type
+    if 'aliases' in data.keys():
+        for i in range(len(data['aliases'].keys())):
+            field_ = list(data['aliases'].items())[i][0]
+            rules_values_ = list(data['aliases'].items())[i][1]
+        
+            test=''
+            for j in reversed(range(len(list(rules_values_)))):
+                if j == len(list(rules_values_)) - 1 :
+                    test = test + 'if(padas_rule=\"' + list(rules_values_)[j] + \
+                        '\", ' + list(rules_values_.values())[j] + ', \"\")'
+                else:
+                    test = 'if(padas_rule=\"' + list(rules_values_)[j] + \
+                        '\", ' + list(rules_values_.values())[j] + ', ' + test + ')'
+                    
+            if i == 0:
+                test = 'eval ' + field_ + '='  + test
+            else:
+                test = ' eval ' + field_ + '='  + test
+
+            correlation_pdl = correlation_pdl + test + ' | '   
+    
+    # Specific rules for each rule type (event_count, value_count, temporal)
+    if ('event_count' in data['type']):
+        correlation_pdl = correlation_pdl + 'event_count timespan=' + \
+            data['timespan'] + ' group_by ' + ', '.join(data['group-by'])
+    elif ('value_count' in data['type']):
+        correlation_pdl = correlation_pdl + 'value_count(' +data['field'] + ') timespan=' + \
+            data['timespan'] + ' group_by ' + ', '.join(data['group-by']) 
+    elif ('temporal' in data['type']):
+        if data.get('value_count') == None:
+             data['ordered'] = True
+         
+        correlation_pdl = correlation_pdl + 'temporal(ordered=' + \
+            str(data['ordered']).lower()  +') [padasRule=\"' + \
+             '\" || padasRule="'.join(data['rule']) + '\"] ' + 'timespan=' + \
+             data['timespan'] + ' group_by ' + ', '.join(data['group-by'])
+
+    # Rules for every rule type
+    if 'condition' in data.keys():
+        for i in list(data['condition'].keys()):
+            if 'range' == i:     
+                ranges_ = data['condition']['range'].split('..')
+                correlation_pdl = correlation_pdl + ' where _count'+ '>=' + ranges_[0] + \
+                    ' AND _count<=' + ranges_[1]
+            else:
+                correlation_pdl = correlation_pdl + ' where _count' + modifs[i] + ' ' + \
+                    str(data['condition'][i])
+
+
+    return correlation_pdl
 
 
 def sigma_to_padas(data, padas_scheme):
@@ -208,25 +311,40 @@ def sigma_to_padas(data, padas_scheme):
         Converted PADAS rules (dict)
 
     """
-    for key, value in padas_scheme.items():
+    if  ('detection' in data.keys()):
+        for key, value in padas_scheme.items():
+            try:
+                if padas_scheme[key] == 'detection':
+                    padas_scheme[key] = padas_rule_converter(data)
+                  
+                elif padas_scheme[key] == 'logsource':
+                    padas_scheme[key] = '_'.join(data['logsource'].values()).replace(' ','_')
+                else:
+                    padas_scheme[key] = data[value] 
+            except:
+                padas_scheme[key] = ''
+        
+    else:
         try:
-            if padas_scheme[key] == 'detection':
-                padas_scheme[key] = pdl_converter(data)
-              
-            elif padas_scheme[key] == 'logsource':
-                padas_scheme[key] = '_'.join(data['logsource'].values()).replace(' ','_')
-            else:
-                padas_scheme[key] = data[value] 
+            for key, value in padas_scheme.items():
+                try:
+                    if padas_scheme[key] == 'action':
+                        padas_scheme[key] = padas_rule_converter_correlation(data)
+                    else:
+                        padas_scheme[key] = data[value] 
+                except:
+                    padas_scheme[key] = '' 
         except:
-            padas_scheme[key] = ''
-    
+             print(data['title'])
+                
+                
     padas_scheme['enabled'] = False
     
 
     return padas_scheme
 
 
-def pdl_to_json(all_padas_rules, path_for_padas_yml_output_file):
+def padas_rule_to_json(all_padas_rules, path_for_padas_yml_output_file):
     """
     Writes PADAS rules into json file (json)
 
@@ -248,6 +366,7 @@ def pdl_to_json(all_padas_rules, path_for_padas_yml_output_file):
     out_file = open(path_for_padas_yml_output_file, "w")
     json.dump(all_padas_rules, out_file, indent = 4, sort_keys = False)
     out_file.close()
+    
         
 def main():
     """
@@ -267,9 +386,11 @@ def main():
         for i in range(len(data_)):
             padas_scheme = get_padas_scheme(data_[i])
             padas_rules = sigma_to_padas(data_[i], padas_scheme)
-            all_padas_rules.append(padas_rules)
             
-        pdl_to_json(all_padas_rules, path_for_padas_yml_output_file)
+            all_padas_rules.append(padas_rules)
+
+                
+        padas_rule_to_json(all_padas_rules, path_for_padas_yml_output_file)
         print('Converting SIGMA Rules to PADAS Rules is Done!')
         print(' ')
     except Exception as error:

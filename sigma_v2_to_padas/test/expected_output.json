@@ -14,7 +14,7 @@
         "description": "This is description",
         "datamodel": "x_category_y_product",
         "annotations": "",
-        "pdl": "((Value=35 OR Value=99 OR Value=\"23\"))",
+        "pdl": "((Value=35) OR (Value=99) OR (Value=\"23\"))",
         "enabled": false
     },
     {
@@ -23,7 +23,7 @@
         "description": "This is description",
         "datamodel": "x_category_y_product",
         "annotations": "",
-        "pdl": "((Image?=\"C:\\\\Windows\\\\System32\\\\whoami.exe\"))",
+        "pdl": "Image?=\"C:\\\\Windows\\\\System32\\\\whoami.exe\"",
         "enabled": false
     },
     {
@@ -32,7 +32,7 @@
         "description": "This is description",
         "datamodel": "x_category_y_product",
         "annotations": "",
-        "pdl": "((Value>35))",
+        "pdl": "Value>35",
         "enabled": false
     },
     {
@@ -41,7 +41,7 @@
         "description": "This is description",
         "datamodel": "x_category_y_product",
         "annotations": "",
-        "pdl": "((Value<100))",
+        "pdl": "Value<100",
         "enabled": false
     },
     {
@@ -59,7 +59,7 @@
         "description": "This is description",
         "datamodel": "x_category_y_product",
         "annotations": "",
-        "pdl": "((Value>35 OR Value>75))",
+        "pdl": "((Value>35) OR (Value>75))",
         "enabled": false
     },
     {
@@ -68,7 +68,7 @@
         "description": "This is description",
         "datamodel": "x_category_y_product",
         "annotations": "",
-        "pdl": "((Value<35 OR Value<75))",
+        "pdl": "((Value<35) OR (Value<75))",
         "enabled": false
     },
     {
@@ -86,7 +86,7 @@
         "description": "This is description",
         "datamodel": "x_category_y_product",
         "annotations": "",
-        "pdl": "((File=\"C:\\\\Windows\\\\System32\\\\*\"))",
+        "pdl": "File=\"C:\\\\Windows\\\\System32\\\\*\"",
         "enabled": false
     },
     {
@@ -95,7 +95,7 @@
         "description": "This is description",
         "datamodel": "x_category_y_product",
         "annotations": "",
-        "pdl": "((File=\"*\\\\example.exe\"))",
+        "pdl": "File=\"*\\\\example.exe\"",
         "enabled": false
     },
     {
@@ -113,7 +113,7 @@
         "description": "This is description",
         "datamodel": "x_category_y_product",
         "annotations": "",
-        "pdl": "((File!=\"*\"))",
+        "pdl": "File!=\"*\"",
         "enabled": false
     },
     {
@@ -131,7 +131,37 @@
         "description": "This is description",
         "datamodel": "x_category_y_product_2",
         "annotations": "",
-        "pdl": "((File?=\"example\") AND (File=\"*.exe\")) and not ((File!=\"*\") AND (File=\"file*\" OR File=\"44*\"))",
+        "pdl": "((File?=\"example\") AND (File=\"*.exe\")) and not ((File!=\"*\") AND (File=\"file*\") OR (File=\"44*\"))",
+        "enabled": false
+    },
+    {
+        "id": "0e00016d",
+        "name": "Test16_event_count & range",
+        "pdl": "padas_rule IN [\"5638f7c0-ac70-491d-8465-2a65075e0d86\", \"5638f7c0-ac70-491d-8465-2a65075e0d87\"] | event_count timespan=1h group_by ComputerName where _count>=100 AND _count<=200",
+        "enabled": false
+    },
+    {
+        "id": "0e00017d",
+        "name": "Test17_value_count & GTE",
+        "pdl": "value_count(User) timespan=1d group_by ComputerName, WorkstationName where _count>= 100",
+        "enabled": false
+    },
+    {
+        "id": "0e00018d",
+        "name": "Test18_select",
+        "pdl": "http.response.status_code=500",
+        "enabled": false
+    },
+    {
+        "id": "0e00019d",
+        "name": "Test19_select",
+        "pdl": "((event.category=\"network\") AND (event.type=\"connection\") AND (event.outcome=\"success\"))",
+        "enabled": false
+    },
+    {
+        "id": "0e00020d",
+        "name": "Test20_temporal & aliases",
+        "pdl": "eval internal_ip=if(padas_rule=\"internal_error\", destination.ip, if(padas_rule=\"new_network_connection\", source.ip, \"\")) |  eval remote_ip=if(padas_rule=\"internal_error\", source.ip, if(padas_rule=\"new_network_connection\", destination.ip, \"\")) | temporal(ordered=true) [padasRule=\"Test18_select\" || padasRule=\"Test19_select\"] timespan=10s group_by internal_ip, remote_ip",
         "enabled": false
     }
 ]
