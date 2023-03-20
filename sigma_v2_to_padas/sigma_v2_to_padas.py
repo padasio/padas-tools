@@ -255,13 +255,8 @@ def padas_rule_converter_correlation(data):
                 else:
                     test = 'if(padas_rule=\"' + list(rules_values_)[j] + \
                         '\", ' + list(rules_values_.values())[j] + ', ' + test + ')'
-                    
-            if i == 0:
-                test = 'eval ' + field_ + '='  + test
-            else:
-                test = ' eval ' + field_ + '='  + test
-
-            correlation_pdl = correlation_pdl + test + ' | '   
+		
+            correlation_pdl = correlation_pdl + 'eval ' + field_ + '='  + test + ' | '   
     
     # Specific rules for each rule type (event_count, value_count, temporal)
     if ('event_count' in data['type']):
