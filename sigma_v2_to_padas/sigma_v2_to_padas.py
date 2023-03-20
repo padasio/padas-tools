@@ -271,7 +271,7 @@ def padas_rule_converter_correlation(data):
         correlation_pdl = correlation_pdl + 'value_count(' +data['field'] + ') timespan=' + \
             data['timespan'] + ' group_by ' + ', '.join(data['group-by']) 
     elif ('temporal' in data['type']):
-        if data.get('value_count') == None:
+        if data.get('ordered') == None:
              data['ordered'] = True
          
         correlation_pdl = correlation_pdl + 'temporal(ordered=' + \
