@@ -24,9 +24,8 @@ Usage :
 
 
 import sys
-path_for_sigma2_yml_input_file = sys.argv[1]#r'input_sigma_rules.yml' #r'input.yml' #
-path_for_padas_yml_output_file = sys.argv[2]#r'output.json' #sys.argv[2]
-
+path_for_sigma2_yml_input_file = sys.argv[1]
+path_for_padas_yml_output_file = sys.argv[2]
 def get_value_and_check_required_fields(path_for_sigma2_yml_input_file):
     """
     Gets input data from yaml file & if there is no "id" area, 
@@ -91,9 +90,16 @@ def get_padas_scheme(data):
 
     """
     
+    if ('title' not in data.keys()):
+        data['title'] = data['name'].replace(' ','_').lower()
+    
     if ('id' not in data.keys()):
         data['id'] = data['title'].replace(' ','_').lower()
-        
+
+    if ('id' not in data.keys()):
+        if ('title' not in data.keys()):
+            raise Exception('There is no unique id, title or name!!')
+           
 
     if 'action' in data.keys():
         no_required_fields = [field for field in ['id', 'title'] if field not in data.keys()]
@@ -103,11 +109,8 @@ def get_padas_scheme(data):
         padas_scheme =  {'id':'id', \
                          'name':'title', \
                          'pdl':'action'}   
-    else:
-        no_required_fields = [field for field in ['id', 'title', 'detection'] if field not in data.keys()]
-        if no_required_fields:
-            raise Exception('Requirement fields are missing: "' + ', "'.join(no_required_fields) + '"')
-            
+    elif 'detection' in data.keys():
+        
         if 'logsource' in data.keys():
             padas_scheme =  {'id':'id', \
                               'name':'title', \
@@ -115,11 +118,16 @@ def get_padas_scheme(data):
                               'datamodel':'logsource', \
                               'annotations':'tags', \
                               'pdl':'detection'}
-        else:
+        elif 'name' in data.keys():
             padas_scheme =  {'id':'id', \
                              'name':'name', \
                              'pdl':'detection'} 
-
+        else:
+            padas_scheme =  {'id':'id', \
+                             'name':'title', \
+                             'pdl':'detection'}             
+    else:
+        raise Exception('Cannot resolve if it is META or SIMPLE Sigma rules.')
           
     return padas_scheme
 
@@ -142,6 +150,10 @@ def padas_rule_converter(data):
     from copy import deepcopy as copy
     import re
     
+    def allAsteriks(pdl):
+        return [[pdl.split()[i-2], star[:-1]] for i, star in enumerate(pdl.split()) if star.find('*') > -1]
+
+    
     modifs = {'contains':'?=',
               'gt':'>',
               'gte':'>=',
@@ -150,10 +162,18 @@ def padas_rule_converter(data):
      
     padas_rule = copy(data)
     pdl = padas_rule['detection'].pop('condition')
+    
+    pdl_asteriks = allAsteriks(pdl)   
+    
+    for i in range(len(pdl_asteriks)):    
+        pdl = pdl.replace(pdl_asteriks[i][1] + '*', '(' + pdl_asteriks[i][1] + '*)')
+    
     for key, value in padas_rule['detection'].items():
         key_query = ['pdl']
+        key_asteriks = [[pdl_asteriks[i][0], pdl_asteriks[i][1]] for i in range(len(pdl_asteriks)) if key.find(pdl_asteriks[i][1]) > -1]
+        allCounter = 0
         for key2 in value.keys():
-            
+
             try:
                 if (key2[key2.find('|')+1::] in modifs):
                     parity = modifs[key2[key2.find('|')+1::]]
@@ -173,6 +193,10 @@ def padas_rule_converter(data):
                            value[key2]=['*' + str(value[key2][val]).replace('\\\\','\\') for val in range(len(value[key2]))]
                         key3 = key2[0:key2.find('|')]
                         parity = '='
+                    elif (key2[-key2[::-1].find('|')::] == 'all'):
+                        parity = modifs[key2[key2.find('|')+1:-key2[::-1].find('|')-1]]
+                        key3 = key2[0:key2.find('|')]
+                        allCounter = 1
                     else:
                         parity = '='
                         key3 = key2
@@ -193,9 +217,12 @@ def padas_rule_converter(data):
                     strs = []
                     for i in range(len(value[key2])):
                         if (isinstance(value[key2][i], str)):
-                            strs.append([key3 +'=' + value[key2][i], key3 +'=\"' + value[key2][i] + '\"'])          
-                    
-                    join_val = ' OR (' + key3 + parity
+                            strs.append([key3 +parity + value[key2][i], key3 + parity +'\"' + value[key2][i] + '\"'])          
+                    if allCounter == 1:
+                        join_val = ' AND (' + key3 + parity
+                    else:
+                        join_val = ' OR (' + key3 + parity
+                        
                     condition_as_str = '(' + key3 + parity + join_val.join([str(x) + ')' for x in value[key2]])
                     
                     for i in range(len(strs)):
@@ -203,15 +230,26 @@ def padas_rule_converter(data):
                     
                     key_query.append(condition_as_str)                  
     
+        
         if isinstance(key_query[1::], str):   
             pdl = pdl.replace('="None"', '!="*"')
         else:
             key_query = ' AND '.join(key_query[1::]) 
-            pdl = pdl.replace(key, '(' + key_query +')').replace('="None"', '!="*"')
+            
+            if len(key_asteriks) > 0:
+                parity2 = ['OR' if key_asteriks[0][0] == '1' else 'AND'][0]
+                pdl = pdl.replace(key_asteriks[0][1] + '*', '(' + key_query +') ' + parity2 + ' ' + key_asteriks[0][1] + '*').replace('="None"', '!="*"')
+            else:
+                pdl = pdl.replace(key, '(' + key_query +')').replace('="None"', '!="*"')
         
         if len(re.findall('\(', pdl)) <= 2:
             pdl = pdl.replace('((', '').replace('))','')
-        
+            
+    pdl = pdl.replace('all of ', '').replace('1 of ', '')
+    for i, j in pdl_asteriks:
+        parity2 = ['OR' if i == '1' else 'AND'][0]
+        pdl = pdl.replace(' ' + parity2 + ' ' + j + '*','')
+    
     return pdl.replace('\\','\\\\')
 
 

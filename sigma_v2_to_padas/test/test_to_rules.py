@@ -5,13 +5,13 @@
 Script works only with test_padas_rules.yml & test_sigma-padas_rules.yml files.
 If you want to use your file names, change these names in getting_test_files function.
 
-To test your own rules, you can change "test_sgima-padas_rules.yml" file.
+To test your own rules, you can change "input_sigma_rules.yml" file.
 
 Usage : 
-    python3 test_to_rules.py path_of_the_created_padas_yml_directory path_of_the_test_directory
+    python3 test_to_rules.py
     
     EXAMPLE : 
-        python3.9 test_to_rules.py ../test_padas_rules.yml . 
+        python3.9 test_to_rules.py
 """
 
 

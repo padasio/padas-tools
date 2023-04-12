@@ -320,3 +320,24 @@ aliases:
   remote_ip:
     internal_error: source.ip
     new_network_connection: destination.ip
+---
+title: Test21_1 of & all of & all
+id: "0e00021d"
+detection:
+  selection_error:
+      Description|contains:
+          - 'Failed to open service configuration with error'
+          - 'Failed to connect to the driver to update configuration'
+  selection_error2:
+      Description|contains:
+          - 'Failed to open service configuration with error2'
+          - 'Failed to connect to the driver to update configuration2'
+  filter_generic_english:
+      Description|contains|all:
+          - 'Failed to open service configuration with error'
+          - 'Last error: The media is write protected.'
+  filter_by_errorcode:
+      Description|contains:
+          - 'Failed to open service configuration with error 19'
+          - 'Failed to open service configuration with error 93'
+  condition: all of selection* and not 1 of filter*
