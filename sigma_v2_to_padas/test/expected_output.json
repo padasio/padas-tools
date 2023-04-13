@@ -4,7 +4,7 @@
         "name": "Test1_AND",
         "description": "This is description",
         "datamodel": "x_category",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "((EventLog=\"Security\") AND (EventID=4769) AND (TicketOptions=\"0x40810000\") AND (TicketEncryption=\"0x17\"))",
         "enabled": false
     },
@@ -13,7 +13,7 @@
         "name": "Test2_OR-Str-Numeric",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "((Value=35) OR (Value=99) OR (Value=\"23\"))",
         "enabled": false
     },
@@ -22,7 +22,7 @@
         "name": "Test3_Contains",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "Image?=\"C:\\\\Windows\\\\System32\\\\whoami.exe\"",
         "enabled": false
     },
@@ -31,7 +31,7 @@
         "name": "Test4_GT",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "Value>35",
         "enabled": false
     },
@@ -40,7 +40,7 @@
         "name": "Test5_LT",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "Value<100",
         "enabled": false
     },
@@ -49,7 +49,7 @@
         "name": "Test6_AND-GT-LT",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "((Value>35) AND (Value<99))",
         "enabled": false
     },
@@ -58,7 +58,7 @@
         "name": "Test7_OR-GT",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "((Value>35) OR (Value>75))",
         "enabled": false
     },
@@ -67,7 +67,7 @@
         "name": "Test8_OR-LT",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "((Value<35) OR (Value<75))",
         "enabled": false
     },
@@ -76,7 +76,7 @@
         "name": "Test9_AND-GTE-LTE",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "((Value>=35) AND (Value<=99))",
         "enabled": false
     },
@@ -85,7 +85,7 @@
         "name": "Test10_Startswith",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "File=\"C:\\\\Windows\\\\System32\\\\*\"",
         "enabled": false
     },
@@ -94,7 +94,7 @@
         "name": "Test11_Endswith",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "File=\"*\\\\example.exe\"",
         "enabled": false
     },
@@ -103,7 +103,7 @@
         "name": "Test12_AND-Startswith-Endswith",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "((File=\"C:\\\\Windows\\\\System32\\\\*\") AND (File=\"*\\\\example.exe\"))",
         "enabled": false
     },
@@ -112,7 +112,7 @@
         "name": "Test13_Null",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "File!=\"*\"",
         "enabled": false
     },
@@ -121,7 +121,7 @@
         "name": "Test14_Contains-Endswith-AND NOT-Null",
         "description": "This is description",
         "datamodel": "x_category_y_product",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "((File?=\"example\") AND (File=\"*.exe\")) and not ((File!=\"*\"))",
         "enabled": false
     },
@@ -130,43 +130,61 @@
         "name": "Test15_Contains-Endswith-AND NOT-Null",
         "description": "This is description",
         "datamodel": "x_category_y_product_2",
-        "annotations": "",
+        "annotations": [""],
         "pdl": "((File?=\"example\") AND (File=\"*.exe\")) and not ((File!=\"*\") AND (File=\"file*\") OR (File=\"44*\"))",
         "enabled": false
     },
     {
         "id": "0e00016d",
         "name": "Test16_event_count & range",
+        "description":"",
+        "datamodel":"padas_alert",
+        "annotations": [""],
         "pdl": "padas_rule IN [\"5638f7c0-ac70-491d-8465-2a65075e0d86\", \"5638f7c0-ac70-491d-8465-2a65075e0d87\"] | event_count timespan=1h group_by ComputerName where _count>=100 AND _count<=200",
         "enabled": false
     },
     {
         "id": "0e00017d",
         "name": "Test17_value_count & GTE",
+        "description":"",
+        "datamodel":"padas_alert",
+        "annotations": [""],
         "pdl": "value_count(User) timespan=1d group_by ComputerName, WorkstationName where _count>= 100",
         "enabled": false
     },
     {
         "id": "0e00018d",
         "name": "Test18_select",
+        "description":"",
+        "datamodel":"",
+        "annotations": [""],
         "pdl": "http.response.status_code=500",
         "enabled": false
     },
     {
         "id": "0e00019d",
         "name": "Test19_select",
+        "description":"",
+        "datamodel":"",
+        "annotations": [""],
         "pdl": "((event.category=\"network\") AND (event.type=\"connection\") AND (event.outcome=\"success\"))",
         "enabled": false
     },
     {
         "id": "0e00020d",
         "name": "Test20_temporal & aliases",
+        "description":"",
+        "datamodel":"padas_alert",
+        "annotations": [""],
         "pdl": "eval internal_ip=if(padas_rule=\"internal_error\", destination.ip, if(padas_rule=\"new_network_connection\", source.ip, \"\")) | eval remote_ip=if(padas_rule=\"internal_error\", source.ip, if(padas_rule=\"new_network_connection\", destination.ip, \"\")) | temporal(ordered=true) [padasRule=\"Test18_select\" || padasRule=\"Test19_select\"] timespan=10s group_by internal_ip, remote_ip",
         "enabled": false
     },
     {
         "id": "0e00021d",
         "name": "Test21_1 of & all of & all",
+        "description":"",
+        "datamodel":"",
+        "annotations": [""],
         "pdl": "(((Description?=\"Failed to open service configuration with error\") OR (Description?=\"Failed to connect to the driver to update configuration\")) AND ((Description?=\"Failed to open service configuration with error2\") OR (Description?=\"Failed to connect to the driver to update configuration2\"))) and not (((Description?=\"Failed to open service configuration with error\") AND (Description?=\"Last error: The media is write protected.\")) OR ((Description?=\"Failed to open service configuration with error 19\") OR (Description?=\"Failed to open service configuration with error 93\")))",        
         "enabled": false
     }

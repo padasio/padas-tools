@@ -22,7 +22,6 @@ Usage :
 	
 """
 
-
 import sys
 path_for_sigma2_yml_input_file = sys.argv[1]
 path_for_padas_yml_output_file = sys.argv[2]
@@ -66,9 +65,12 @@ def get_padas_scheme(data):
         
     
         - meta rule
-                        {'id':'id', \
+                         {'id':'id', \
                          'name':'title', \
-                         'pdl':'action'}    
+                         'description':'description', \
+                        'datamodel':'logsource', \
+                        'annotations':'tags', \
+                        'pdl':'action'} 
 
     Parameters
     ----------
@@ -108,28 +110,31 @@ def get_padas_scheme(data):
             
         padas_scheme =  {'id':'id', \
                          'name':'title', \
-                         'pdl':'action'}   
+                         'description':'description', \
+                        'datamodel':'logsource', \
+                        'annotations':'tags', \
+                        'pdl':'action'}
+            
     elif 'detection' in data.keys():
         
-        if 'logsource' in data.keys():
+        if 'name' in data.keys():
             padas_scheme =  {'id':'id', \
-                              'name':'title', \
+                              'name':'name', \
                               'description':'description', \
                               'datamodel':'logsource', \
                               'annotations':'tags', \
                               'pdl':'detection'}
-        elif 'name' in data.keys():
-            padas_scheme =  {'id':'id', \
-                             'name':'name', \
-                             'pdl':'detection'} 
         else:
-            padas_scheme =  {'id':'id', \
-                             'name':'title', \
-                             'pdl':'detection'}             
-    else:
-        raise Exception('Cannot resolve if it is META or SIMPLE Sigma rules.')
-          
+            padas_scheme =   {'id':'id', \
+                              'name':'title', \
+                              'description':'description', \
+                              'datamodel':'logsource', \
+                              'annotations':'tags', \
+                              'pdl':'detection'}         
     return padas_scheme
+
+          
+    
 
 
 def padas_rule_converter(data):
@@ -151,6 +156,19 @@ def padas_rule_converter(data):
     import re
     
     def allAsteriks(pdl):
+        """
+        
+
+        Parameters
+        ----------
+        pdl : 
+            condition field from Sigma Rule (str)
+
+        Returns
+        -------
+        Fields with "*" (list)
+
+        """
         return [[pdl.split()[i-2], star[:-1]] for i, star in enumerate(pdl.split()) if star.find('*') > -1]
 
     
@@ -344,31 +362,31 @@ def sigma_to_padas(data, padas_scheme):
         Converted PADAS rules (dict)
 
     """
-    if  ('detection' in data.keys()):
-        for key, value in padas_scheme.items():
-            try:
-                if padas_scheme[key] == 'detection':
-                    padas_scheme[key] = padas_rule_converter(data)
-                  
-                elif padas_scheme[key] == 'logsource':
-                    padas_scheme[key] = '_'.join(data['logsource'].values()).replace(' ','_')
-                else:
-                    padas_scheme[key] = data[value] 
-            except:
-                padas_scheme[key] = ''
-        
-    else:
+   
+    for key, value in padas_scheme.items():
         try:
-            for key, value in padas_scheme.items():
-                try:
-                    if padas_scheme[key] == 'action':
-                        padas_scheme[key] = padas_rule_converter_correlation(data)
-                    else:
-                        padas_scheme[key] = data[value] 
-                except:
-                    padas_scheme[key] = '' 
+            if padas_scheme[key] == 'detection':
+                padas_scheme[key] = padas_rule_converter(data)
+              
+            elif padas_scheme[key] == 'logsource':
+                padas_scheme[key] = '_'.join(data['logsource'].values()).replace(' ','_')
+            elif padas_scheme[key] == 'tags':
+                if 'tags' not in data.keys():
+                    padas_scheme[key] = ['']
+                else:
+                    padas_scheme[key] = [data[value]]
+            elif padas_scheme[key] == 'action':
+                padas_scheme[key] = padas_rule_converter_correlation(data)
+            else:
+                padas_scheme[key] = data[value] 
         except:
-             print(data['title'])
+            padas_scheme[key] = ''
+    
+    if  ('action' in data.keys()):
+        padas_scheme['datamodel'] = 'padas_alert'
+        
+    # else:
+        # print(data['title'])
                 
                 
     padas_scheme['enabled'] = False
