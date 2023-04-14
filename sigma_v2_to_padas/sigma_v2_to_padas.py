@@ -170,7 +170,6 @@ def padas_rule_converter(data):
 
         """
         return [[pdl.split()[i-2], star[:-1]] for i, star in enumerate(pdl.split()) if star.find('*') > -1]
-
     
     modifs = {'contains':'?=',
               'gt':'>',
@@ -182,7 +181,7 @@ def padas_rule_converter(data):
     pdl = padas_rule['detection'].pop('condition')
     
     pdl_asteriks = allAsteriks(pdl)   
-    
+  
     for i in range(len(pdl_asteriks)):    
         pdl = pdl.replace(pdl_asteriks[i][1] + '*', '(' + pdl_asteriks[i][1] + '*)')
     
@@ -191,36 +190,29 @@ def padas_rule_converter(data):
         key_asteriks = [[pdl_asteriks[i][0], pdl_asteriks[i][1]] for i in range(len(pdl_asteriks)) if key.find(pdl_asteriks[i][1]) > -1]
         allCounter = 0
         for key2 in value.keys():
-
-            try:
-                if (key2[key2.find('|')+1::] in modifs):
-                    parity = modifs[key2[key2.find('|')+1::]]
+            if (key2[key2.find('|')+1::] in modifs):
+                parity = modifs[key2[key2.find('|')+1::]]
+                key3 = key2[0:key2.find('|')]
+            else:
+                if (key2[key2.find('|')+1::] == 'startswith'):
+                    if (isinstance(value[key2], int) | isinstance(value[key2], str)):
+                        value[key2]=str(value[key2]).replace('\\\\','\\') + '*'
+                    else:                        
+                        value[key2]=[str(value[key2][val]).replace('\\\\','\\') + '*' for val in range(len(value[key2]))]
                     key3 = key2[0:key2.find('|')]
-                else:
-                    if (key2[key2.find('|')+1::] == 'startswith'):
-                        if (isinstance(value[key2], int) | isinstance(value[key2], str)):
-                            value[key2]=str(value[key2]).replace('\\\\','\\') + '*'
-                        else:                        
-                            value[key2]=[str(value[key2][val]).replace('\\\\','\\') + '*' for val in range(len(value[key2]))]
-                        key3 = key2[0:key2.find('|')]
-                        parity = '='
-                    elif (key2[key2.find('|')+1::] == 'endswith'):
-                        if (isinstance(value[key2], int) | isinstance(value[key2], str)):
-                            value[key2]='*' + str(value[key2]).replace('\\\\','\\')
-                        else:
-                           value[key2]=['*' + str(value[key2][val]).replace('\\\\','\\') for val in range(len(value[key2]))]
-                        key3 = key2[0:key2.find('|')]
-                        parity = '='
-                    elif (key2[-key2[::-1].find('|')::] == 'all'):
-                        parity = modifs[key2[key2.find('|')+1:-key2[::-1].find('|')-1]]
-                        key3 = key2[0:key2.find('|')]
-                        allCounter = 1
+                    parity = '='
+                elif (key2[key2.find('|')+1::] == 'endswith'):
+                    if (isinstance(value[key2], int) | isinstance(value[key2], str)):
+                        value[key2]='*' + str(value[key2]).replace('\\\\','\\')
                     else:
-                        parity = '='
-                        key3 = key2
-            except:
-                parity = '='
-                key3 = key2
+                       value[key2]=['*' + str(value[key2][val]).replace('\\\\','\\') for val in range(len(value[key2]))]
+                    
+                    key3 = key2[0:key2.find('|')]
+                    parity = '='
+                else:
+                    return ''
+                    break
+            
 
             if value[key2] is None:
                 key_query.append('(' + key2 + '!=\"*\")')
@@ -355,6 +347,15 @@ def sigma_to_padas(data, padas_scheme):
         SIGMA V2 data from yaml file (dict)
     padas_scheme : 
         Proper SIGMA-PADAS scheme (dict)
+    
+    Raises
+    ------
+    Exception
+        If pdl field is empty,
+        it will raise below error
+
+        => There is unrecognized value modifer!
+        
 
     Returns
     -------
@@ -382,16 +383,14 @@ def sigma_to_padas(data, padas_scheme):
         except:
             padas_scheme[key] = ''
     
+    if padas_scheme['pdl'] == '':
+        raise Exception('There is unrecognized value modifer!')    
+    
     if  ('action' in data.keys()):
         padas_scheme['datamodel'] = 'padas_alert'
         
-    # else:
-        # print(data['title'])
-                
-                
-    padas_scheme['enabled'] = False
-    
 
+    padas_scheme['enabled'] = False
     return padas_scheme
 
 
