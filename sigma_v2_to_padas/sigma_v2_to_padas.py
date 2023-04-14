@@ -188,7 +188,6 @@ def padas_rule_converter(data):
     for key, value in padas_rule['detection'].items():
         key_query = ['pdl']
         key_asteriks = [[pdl_asteriks[i][0], pdl_asteriks[i][1]] for i in range(len(pdl_asteriks)) if key.find(pdl_asteriks[i][1]) > -1]
-        allCounter = 0
         for key2 in value.keys():
             if (key2[key2.find('|')+1::] in modifs):
                 parity = modifs[key2[key2.find('|')+1::]]
@@ -210,8 +209,12 @@ def padas_rule_converter(data):
                     key3 = key2[0:key2.find('|')]
                     parity = '='
                 else:
-                    return ''
-                    break
+                    if key2.find('|') == -1:
+                        parity = '='
+                        key3 = key2	
+                    else:
+                        return ''
+                        break
             
 
             if value[key2] is None:
@@ -228,10 +231,10 @@ def padas_rule_converter(data):
                     for i in range(len(value[key2])):
                         if (isinstance(value[key2][i], str)):
                             strs.append([key3 +parity + value[key2][i], key3 + parity +'\"' + value[key2][i] + '\"'])          
-                    if allCounter == 1:
-                        join_val = ' AND (' + key3 + parity
-                    else:
-                        join_val = ' OR (' + key3 + parity
+                    #if allCounter == 1:
+                    #    join_val = ' AND (' + key3 + parity
+                    #else:
+                    join_val = ' OR (' + key3 + parity
                         
                     condition_as_str = '(' + key3 + parity + join_val.join([str(x) + ')' for x in value[key2]])
                     
@@ -370,7 +373,10 @@ def sigma_to_padas(data, padas_scheme):
                 padas_scheme[key] = padas_rule_converter(data)
               
             elif padas_scheme[key] == 'logsource':
-                padas_scheme[key] = '_'.join(data['logsource'].values()).replace(' ','_')
+                # check category, product and services fields are exists under logsource
+                values_ = [data['logsource'][i] for i in ['category', 'product', 'service'] if i in data['logsource']]
+                
+                padas_scheme[key] = '_'.join(values_).replace(' ','_')
             elif padas_scheme[key] == 'tags':
                 if 'tags' not in data.keys():
                     padas_scheme[key] = ['']
@@ -384,11 +390,10 @@ def sigma_to_padas(data, padas_scheme):
             padas_scheme[key] = ''
     
     if padas_scheme['pdl'] == '':
-        raise Exception('There is unrecognized value modifer!')    
+        raise Exception('There is unrecognized value modifer in id : ' + padas_scheme['id'] )    
     
     if  ('action' in data.keys()):
         padas_scheme['datamodel'] = 'padas_alert'
-        
 
     padas_scheme['enabled'] = False
     return padas_scheme

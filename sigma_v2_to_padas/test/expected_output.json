@@ -181,11 +181,11 @@
     },
     {
         "id": "0e00021d",
-        "name": "Test21_1 of & all of & all",
+        "name": "Test21_1 of & all of",
         "description":"",
         "datamodel":"",
         "annotations": [""],
-        "pdl": "(((Description?=\"Failed to open service configuration with error\") OR (Description?=\"Failed to connect to the driver to update configuration\")) AND ((Description?=\"Failed to open service configuration with error2\") OR (Description?=\"Failed to connect to the driver to update configuration2\"))) and not (((Description?=\"Failed to open service configuration with error\") AND (Description?=\"Last error: The media is write protected.\")) OR ((Description?=\"Failed to open service configuration with error 19\") OR (Description?=\"Failed to open service configuration with error 93\")))",        
+        "pdl": "(((Description?=\"Failed to open service configuration with error\") OR (Description?=\"Failed to connect to the driver to update configuration\")) AND ((Description?=\"Failed to open service configuration with error2\") OR (Description?=\"Failed to connect to the driver to update configuration2\"))) and not (((Description?=\"Failed to open service configuration with error\") OR (Description?=\"Last error: The media is write protected.\")) OR ((Description?=\"Failed to open service configuration with error 19\") OR (Description?=\"Failed to open service configuration with error 93\")))",        
         "enabled": false
     }
 ]

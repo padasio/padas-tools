@@ -321,7 +321,7 @@ aliases:
     internal_error: source.ip
     new_network_connection: destination.ip
 ---
-title: Test21_1 of & all of & all
+title: Test21_1 of & all of
 id: "0e00021d"
 detection:
   selection_error:
@@ -333,7 +333,7 @@ detection:
           - 'Failed to open service configuration with error2'
           - 'Failed to connect to the driver to update configuration2'
   filter_generic_english:
-      Description|contains|all:
+      Description|contains:
           - 'Failed to open service configuration with error'
           - 'Last error: The media is write protected.'
   filter_by_errorcode:
