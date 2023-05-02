@@ -140,7 +140,7 @@
         "description":"",
         "datamodel":"padas_alert",
         "annotations": [""],
-        "pdl": "padas_rule IN [\"5638f7c0-ac70-491d-8465-2a65075e0d86\", \"5638f7c0-ac70-491d-8465-2a65075e0d87\"] | event_count timespan=1h group_by ComputerName where _count>=100 AND _count<=200",
+        "pdl": "padas_rule IN [\"5638f7c0-ac70-491d-8465-2a65075e0d86\", \"5638f7c0-ac70-491d-8465-2a65075e0d87\"] | event_count timespan=1h group_by ComputerName where padasAggregation.eventCount>=100 AND padasAggregation.eventCount<=200",
         "enabled": false
     },
     {
@@ -149,7 +149,7 @@
         "description":"",
         "datamodel":"padas_alert",
         "annotations": [""],
-        "pdl": "value_count(User) timespan=1d group_by ComputerName, WorkstationName where _count>= 100",
+        "pdl": "value_count(User) timespan=1d group_by ComputerName, WorkstationName where padasAggregation.valueCount>= 100",
         "enabled": false
     },
     {

@@ -311,9 +311,11 @@ def padas_rule_converter_correlation(data):
     
     # Specific rules for each rule type (event_count, value_count, temporal)
     if ('event_count' in data['type']):
+        where_condition = 'padasAggregation.eventCount'
         correlation_pdl = correlation_pdl + 'event_count timespan=' + \
             data['timespan'] + ' group_by ' + ', '.join(data['group-by'])
     elif ('value_count' in data['type']):
+        where_condition = 'padasAggregation.valueCount'
         correlation_pdl = correlation_pdl + 'value_count(' +data['field'] + ') timespan=' + \
             data['timespan'] + ' group_by ' + ', '.join(data['group-by']) 
     elif ('temporal' in data['type']):
@@ -330,10 +332,10 @@ def padas_rule_converter_correlation(data):
         for i in list(data['condition'].keys()):
             if 'range' == i:     
                 ranges_ = data['condition']['range'].split('..')
-                correlation_pdl = correlation_pdl + ' where _count'+ '>=' + ranges_[0] + \
-                    ' AND _count<=' + ranges_[1]
+                correlation_pdl = correlation_pdl + ' where ' + where_condition + '>=' + ranges_[0] + \
+                    ' AND ' + where_condition + '<=' + ranges_[1]
             else:
-                correlation_pdl = correlation_pdl + ' where _count' + modifs[i] + ' ' + \
+                correlation_pdl = correlation_pdl + ' where ' + where_condition + modifs[i] + ' ' + \
                     str(data['condition'][i])
 
 
