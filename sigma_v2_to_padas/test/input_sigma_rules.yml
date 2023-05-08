@@ -341,3 +341,27 @@ detection:
           - 'Failed to open service configuration with error 19'
           - 'Failed to open service configuration with error 93'
   condition: all of selection* and not 1 of filter*
+---
+title: Test22_mod1 & mod2
+id: "0e00022d"
+description: This is description
+references:
+      - This is references
+author: This is Auth
+date: XXXX/XX/XX
+logsource:
+    category: x_category
+    product: y_product
+detection:
+    selection:
+        Directory|contains|all:
+          - 'windows'
+          - 'os'
+        File|startswith|endswith:
+          - 'file'
+          - 'file2'
+        Value|lt|gt:
+          - 23
+          - 83
+    condition: selection
+level: high

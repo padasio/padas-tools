@@ -24,7 +24,7 @@ Usage :
 
 import sys
 path_for_sigma2_yml_input_file = sys.argv[1]
-path_for_padas_yml_output_file = sys.argv[2]
+path_for_padas_json_output_file = sys.argv[2]
 def get_value_and_check_required_fields(path_for_sigma2_yml_input_file):
     """
     Gets input data from yaml file & if there is no "id" area, 
@@ -152,7 +152,7 @@ def padas_rule_converter(data):
         Converted SIGMA V2 Simple Rule to PADAS Language (dict)
 
     """
-    from copy import deepcopy as copy
+    from copy import deepcopy as dc
     import re
     
     def allAsteriks(pdl):
@@ -171,13 +171,42 @@ def padas_rule_converter(data):
         """
         return [[pdl.split()[i-2], star[:-1]] for i, star in enumerate(pdl.split()) if star.find('*') > -1]
     
+    
+    def detection_field_rules(key2, values, mod):
+        
+        value = dc(values)
+        if (mod in modifs):
+            parity = modifs[mod]
+            return parity, value
+        elif (mod == 'startswith'):
+            if (isinstance(value[key2], int) | isinstance(value[key2], str)):
+                value[key2]=str(value[key2]).replace('\\\\','\\') + '*'
+            else:                        
+                value[key2]=[str(value[key2][val]).replace('\\\\','\\') + '*' for val in range(len(value[key2]))]
+            parity = '='
+            return parity, value
+        elif (mod == 'endswith'):
+            if (isinstance(value[key2], int) | isinstance(value[key2], str)):
+                value[key2]='*'  + str(value[key2]).replace('\\\\','\\')
+            else:
+               value[key2]=['*' + str(value[key2][val]).replace('\\\\','\\') for val in range(len(value[key2]))]
+
+            parity = '='  
+            return parity, value
+        else:
+            if mod != 'all':
+                return mod, values
+            else:
+                return '', values
+
+   
     modifs = {'contains':'?=',
               'gt':'>',
               'gte':'>=',
               'lt':'<',
               'lte':'<='}
      
-    padas_rule = copy(data)
+    padas_rule = dc(data)
     pdl = padas_rule['detection'].pop('condition')
     
     pdl_asteriks = allAsteriks(pdl)   
@@ -185,75 +214,96 @@ def padas_rule_converter(data):
     for i in range(len(pdl_asteriks)):    
         pdl = pdl.replace(pdl_asteriks[i][1] + '*', '(' + pdl_asteriks[i][1] + '*)')
     
-    for key, value in padas_rule['detection'].items():
+    for key, values in padas_rule['detection'].items():
         key_query = ['pdl']
-        key_asteriks = [[pdl_asteriks[i][0], pdl_asteriks[i][1]] for i in range(len(pdl_asteriks)) if key.find(pdl_asteriks[i][1]) > -1]
-        for key2 in value.keys():
-            if (key2[key2.find('|')+1::] in modifs):
-                parity = modifs[key2[key2.find('|')+1::]]
-                key3 = key2[0:key2.find('|')]
-            else:
-                if (key2[key2.find('|')+1::] == 'startswith'):
-                    if (isinstance(value[key2], int) | isinstance(value[key2], str)):
-                        value[key2]=str(value[key2]).replace('\\\\','\\') + '*'
-                    else:                        
-                        value[key2]=[str(value[key2][val]).replace('\\\\','\\') + '*' for val in range(len(value[key2]))]
-                    key3 = key2[0:key2.find('|')]
-                    parity = '='
-                elif (key2[key2.find('|')+1::] == 'endswith'):
-                    if (isinstance(value[key2], int) | isinstance(value[key2], str)):
-                        value[key2]='*' + str(value[key2]).replace('\\\\','\\')
-                    else:
-                       value[key2]=['*' + str(value[key2][val]).replace('\\\\','\\') for val in range(len(value[key2]))]
-                    
-                    key3 = key2[0:key2.find('|')]
-                    parity = '='
-                else:
-                    if key2.find('|') == -1:
-                        parity = '='
-                        key3 = key2	
-                    else:
-                        return ''
-                        break
-            
-
-            if value[key2] is None:
-                key_query.append('(' + key2 + '!=\"*\")')
-            else: 
-                if isinstance(value[key2], str):
-                    key_query.append('(' + key3 + parity +'\"' + str(value[key2]) + '\")')
-                    
-                elif (isinstance(value[key2], int) | isinstance(value[key2], bool)):
-                    key_query.append('(' + key3 + parity + str(value[key2]) + ')')
-                else:
-                    
-                    strs = []
-                    for i in range(len(value[key2])):
-                        if (isinstance(value[key2][i], str)):
-                            strs.append([key3 +parity + value[key2][i], key3 + parity +'\"' + value[key2][i] + '\"'])          
-                    #if allCounter == 1:
-                    #    join_val = ' AND (' + key3 + parity
-                    #else:
-                    join_val = ' OR (' + key3 + parity
-                        
-                    condition_as_str = '(' + key3 + parity + join_val.join([str(x) + ')' for x in value[key2]])
-                    
-                    for i in range(len(strs)):
-                        condition_as_str = condition_as_str.replace(strs[i][0], strs[i][1])
-                    
-                    key_query.append(condition_as_str)                  
-    
+        key_asteriks = [[pdl_asteriks[i][0], pdl_asteriks[i][1]] for i in range(len(pdl_asteriks)) if key.find(pdl_asteriks[i][1]) > -1]        
         
+        for key2 in values.keys():
+            # print(key2)
+            
+            splitted_key2 = key2.split('|')
+            
+            try:
+                mod1 = splitted_key2[1]
+                field = splitted_key2[0]
+                try:
+                    mod2 = splitted_key2[2]
+                except:
+                    mod2 = ''
+            except:
+                mod1 = '='
+                mod2 = ''
+                field = splitted_key2[0]  #key3
+          
+            try:
+                del(parity1, parity2, value1, value2)
+            except:
+                pass
+
+            parity1, value1 = detection_field_rules(key2, values, mod1)
+            parity2, value2 = detection_field_rules(key2, values, mod2)
+
+            part_query = []            
+            if parity2 != '':
+                if isinstance(value1[key2], (int, float, str, bool))|(value1[key2] is None):
+                    lens = 1
+                else:
+                    lens = len(value1[key2])
+                for vals in range(lens):
+                    try:
+                        val1 = value1[key2][vals]
+                    except:
+                        val1 = value1[key2]
+                    try:
+                        val2 = value2[key2][vals]
+                    except:
+                        val2 = value2[key2]
+
+                    if isinstance(val1, str):
+                        val1 = '\"' + val1 + '\"'               
+                    if isinstance(val2, str):
+                        val2 = '\"' + val2 + '\"' 
+                    
+                    sentence = '(' + field + parity1 + str(val1).replace('None', '!=\"*\"') + ') AND (' + field + parity2 + str(val2).replace('None', '!=\"*\"') + ')'
+                    part_query.append(sentence.replace('=!=', '!='))
+            else:
+                if isinstance(value1[key2], (int, float, str, bool))|(value1[key2] is None):
+                    lens = 1
+                else:
+                    lens = len(value1[key2])
+                for vals in range(lens):
+                    if lens != 1:
+                        val1 = value1[key2][vals]
+                    else:
+                        val1 = value1[key2]
+                    if isinstance(val1, str):
+                        val1 = '\"' + val1 + '\"'
+                    sentence = field + parity1 + str(val1).replace('None', '!=\"*\"')
+                    part_query.append(sentence.replace('=!=', '!='))
+            
+            if mod2 == 'all':
+                join_val = ' AND ('
+            else:
+                join_val = ' OR ('
+                
+            if lens != 1:
+                if len(values.keys()) != 1:
+                    key_query.append('((' + join_val.join([str(x) + ')' for x in part_query]) + ')')   
+                else:
+                    key_query.append('(' + join_val.join([str(x) + ')' for x in part_query])) 
+            else:    
+                key_query.append('(' + join_val.join([str(x) + ')' for x in part_query])) 
+    
         if isinstance(key_query[1::], str):   
             pdl = pdl.replace('="None"', '!="*"')
         else:
-            key_query = ' AND '.join(key_query[1::]) 
+            key_query = ' AND '.join(key_query[1::])
             
             if len(key_asteriks) > 0:
                 parity2 = ['OR' if key_asteriks[0][0] == '1' else 'AND'][0]
-                pdl = pdl.replace(key_asteriks[0][1] + '*', '(' + key_query +') ' + parity2 + ' ' + key_asteriks[0][1] + '*').replace('="None"', '!="*"')
+                pdl = pdl.replace(key_asteriks[0][1] + '*', '(' + key_query +') ' + parity2 + ' ' + key_asteriks[0][1] + '*')
             else:
-                pdl = pdl.replace(key, '(' + key_query +')').replace('="None"', '!="*"')
+                pdl = pdl.replace(key, '(' + key_query +')')
         
         if len(re.findall('\(', pdl)) <= 2:
             pdl = pdl.replace('((', '').replace('))','')
@@ -263,7 +313,7 @@ def padas_rule_converter(data):
         parity2 = ['OR' if i == '1' else 'AND'][0]
         pdl = pdl.replace(' ' + parity2 + ' ' + j + '*','')
     
-    return pdl.replace('\\','\\\\')
+    return pdl.replace('"', '\"').replace('\\','\\\\')
 
 
 def padas_rule_converter_correlation(data):
@@ -447,7 +497,7 @@ def main():
             all_padas_rules.append(padas_rules)
 
                 
-        padas_rule_to_json(all_padas_rules, path_for_padas_yml_output_file)
+        padas_rule_to_json(all_padas_rules, path_for_padas_json_output_file)
         print('Converting SIGMA Rules to PADAS Rules is Done!')
         print(' ')
     except Exception as error:
