@@ -7,10 +7,13 @@ SIGMA V2 Rules to PADAS
     PADAS Requirements in SIGMA V2 - Simple YML Files: 
         required = ['id', 'title', 'detection']
         
-        If one of them is missing it will raise below error
-            => Requirement fields are missing: MISSING_FIELD
          
- 
+    PADAS Requirements in SIGMA V2 - Meta YML Files:
+        required = ['id', 'title', 'action']
+
+        If one of them is missing it will raise below error
+            => Requirement fields are missing: MISSING_FIELD 
+
 Usage : 
     python3 sigma_v2_to_padas.py path_for_sigma2_yml_input_file path_for_padas_yml_output_file
     EXAMPLE : 

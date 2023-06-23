@@ -1,6 +1,6 @@
 title: Test1_AND
 id: "0e0001d-7320-415d-80f7-004da920fc11"
-description: This is description
+description: Test for using AND condition in the field selections - Simple.
 references:
       - This is references
 author: This is Auth
@@ -17,7 +17,7 @@ detection:
 ---
 title: Test2_OR-Str-Numeric
 id: "0e0002d"
-description: This is description
+description: Test for using both numeric and string numbers in the same field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -36,7 +36,7 @@ level: high
 ---
 title: Test3_Contains
 id: 10e0003d-7320-415d-80f7-004da920fc11"
-description: This is description
+description: Test for using contains argument in the field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -52,7 +52,7 @@ level: high
 ---
 title: Test4_GT
 id: "0e0004d"
-description: This is description
+description: Test for using GT (greater than) argument in the field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -68,7 +68,7 @@ level: high
 ---
 title: Test5_LT
 id: "0e0005d"
-description: This is description
+description: Test for using LT (less than) argument in the field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -84,7 +84,7 @@ level: high
 ---
 title: Test6_AND-GT-LT
 id: "0e0006d"
-description: This is description
+description: Test for using both GT (greater than) AND LT (less than) argument in the same field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -101,7 +101,7 @@ level: high
 ---
 title: Test7_OR-GT
 id: "0e0007d"
-description: This is description
+description: Test for using 2 GT (greater than) argument with OR connector in the same field selection - This may produce an illogical result - Simple.
 references:
       - This is references
 author: This is Auth
@@ -119,7 +119,7 @@ level: high
 ---
 title: Test8_OR-LT
 id: "0e0008d"
-description: This is description
+description: Test for using 2 LT (less than) argument with OR connector in the same field selection - This may produce an illogical result - Simple.
 references:
       - This is references
 author: This is Auth
@@ -137,7 +137,7 @@ level: high
 ---
 title: Test9_AND-GTE-LTE
 id: "0e0009d"
-description: This is description
+description: Test for using both GTE (greater than or equals) AND LTE (less than or equals) argument in the same field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -154,7 +154,7 @@ level: high
 ---
 title: Test10_Startswith
 id: "0e00010d"
-description: This is description
+description: Test for using startswith argument in the field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -170,7 +170,7 @@ level: high
 ---
 title: Test11_Endswith
 id: "0e00011d"
-description: This is description
+description: Test for using endswith argument in the field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -186,7 +186,7 @@ level: high
 ---
 title: Test12_AND-Startswith-Endswith
 id: "0e00012d"
-description: This is description
+description: Test for using both startswith AND endswith argument in the same field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -203,7 +203,7 @@ level: high
 ---
 title: Test13_Null
 id: "0e00013d"
-description: This is description
+description: Test for seraching NULL data in the field selection - Simple.
 references:
       - This is references
 author: This is Auth
@@ -219,7 +219,7 @@ level: high
 ---
 title: Test14_Contains-Endswith-AND NOT-Null
 id: "0e00014d"
-description: This is description
+description: Test for using both contains AND endswith argument in the same field selection but not with NULL data - Simple.
 references:
       - This is references
 author: This is Auth
@@ -238,7 +238,7 @@ level: high
 ---
 title: Test15_Contains-Endswith-AND NOT-Null
 id: "0e00015d"
-description: This is description
+description: Test for using both contains AND endswith argument in the same field selection but not with both NULL data and startswith argument - Simple.
 references:
       - This is references
 author: This is Auth
@@ -323,6 +323,7 @@ aliases:
 ---
 title: Test21_1 of & all of
 id: "0e00021d"
+description: Test for selection of have same pattern as selection* fields and exclude 1 of the filter field - Simple.
 detection:
   selection_error:
       Description|contains:
@@ -344,7 +345,7 @@ detection:
 ---
 title: Test22_mod1 & mod2
 id: "0e00022d"
-description: This is description
+description: Test for using two different argument together (Ex : Directory has to CONTAINS and have ALL values) - Simple
 references:
       - This is references
 author: This is Auth
